@@ -1,0 +1,27 @@
+{
+  "name": "mongo-scrape",
+  "version": "1.0.0",
+  "description": "Data scraping activity using cheerio, designed as class project ",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/r-andrew-dev/mongo-scrape.git"
+  },
+  "author": "Rachael Andrew",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/r-andrew-dev/mongo-scrape/issues"
+  },
+  "homepage": "https://github.com/r-andrew-dev/mongo-scrape#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.7",
+    "morgan": "^1.10.0"
+  }
+}
