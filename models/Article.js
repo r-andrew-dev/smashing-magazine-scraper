@@ -9,6 +9,7 @@ const ArticleSchema = new Schema({
   // `title` is required and of type String
   title: {
     type: String,
+    unique: true,
     required: true
   },
   // `link` is required and of type String
@@ -19,11 +20,18 @@ const ArticleSchema = new Schema({
   // `note` is an object that stores a Note id
   // The ref property links the ObjectId to the Note model
   // This allows us to populate the Article with an associated Note
-  Comment: {
+  comment: {
     type: Schema.Types.ObjectId,
     ref: "Comment"
+  },
+  saved: {
+    type: Boolean,
+    default: false
   }
-});
+}, {
+  timestamps: true
+})
+
 
 // This creates our model from the above schema, using mongoose's model method
 const Article = mongoose.model("Article", ArticleSchema);

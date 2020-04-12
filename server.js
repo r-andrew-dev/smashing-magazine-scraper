@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 const logger = require('morgan')
 const port = process.env.PORT || 8080;
 
-// const db = require('./models');
+const db = require('./models');
 
 const app = express()
 
@@ -19,11 +19,6 @@ app.use(express.json());
 
 // Make public a static folder
 app.use(express.static("public"));
-
-// Simple home page route
-app.get('/', function (req, res) {
-    res.sendFile(path.join(`${__dirname} ./public/index.html`))
-})
 
 // // database connection options
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadLines";
@@ -51,11 +46,11 @@ app.get('/scrape', function (req, res) {
             const result = {}
 
             result.title = $(this).find("h1").text();
-            result.link = `https://www.smashingmagazine.com/${$(this)
+            result.link = `https://www.smashingmagazine.com${$(this)
                         .find('h1').find('a').attr('href')}`;
             result.summary = $(this).find('p').text();
 
-            if (!title || !link || !summary) {
+            if (!result.title || !result.link || !result.summary) {
                 console.log('error')
             } else {
 
@@ -71,11 +66,30 @@ app.get('/scrape', function (req, res) {
 
         });
 
-        res.send('scrape complete!')
-
     });
 
 });
+
+
+// Route for getting all articles from the database.
+app.get("/saved", function(req, res) {
+    // Grab every document in the Articles collection
+    db.Article.find({saved: true})
+        .populate('Comment')
+      .then(function(dbArticle) {
+        // If we were able to successfully find Articles, send them back to the client
+        res.json(dbArticle);
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        res.json(err);
+      });
+  });
+
+// Simple home page route
+app.get('/', function (req, res) {
+    res.sendFile(path.join(`${__dirname} ./public/index.html`))
+})
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`))

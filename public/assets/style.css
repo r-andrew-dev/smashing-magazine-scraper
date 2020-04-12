@@ -16,7 +16,8 @@
 }
 
 #article-holder {
-    background-color: rgb(204, 59, 59);
+    background-color: rgb(21, 153, 38);
+    color: seashell;x
 }
 
 #top-image {
@@ -28,6 +29,7 @@
 .header-text {
     position: absolute;
     top: 50%;
-    left: 50%;
+    left: 45%;
     transform: translate(-50%, -50%);
+    background-color: #14565A
 }
