@@ -1,23 +1,45 @@
 $('#scrape').on('click', function() {
-$('#article-holder').empty();
-$.getJSON("/articles", function(data) {
-    // For each one
-    for (var i = 0; i < data.length; i++) {
-      // Display the apropos information on the page
-      $("#article-holder").append(
-        `<div class='article'>
-          <h3>${data[i].title}</h3>
-          <br>
-          <p>${data[i].summary}</p>
-          <a href='${data[i].link}' target='_blank'>Read More</a></div>
-          <button class='save-it btn btn-danger' data-id='${data[i]._id}'>Save</button>`)
-    }
+  $('#article-holder').empty();
+  $.getJSON("/scrape", function(data) {
+      for (var i = 0; i < data.length; i++) {
+        // Display the apropos information on the page
+        $("#article-holder").append(
+          `<div class='article'>
+            <h3>${data[i].title}</h3>
+            <br>
+            <p>${data[i].summary}</p>
+            <a href='${data[i].link}' target='_blank'>Read More</a></div>
+            <a class='save-it btn btn-danger' data-id='${data[i]._id}' href='/saved${data[i]._id}'>Save</a>
+            </div>`)
+      }
+    });
+  
   });
+  
+  $('#saved').on('click', function() {
+    $('#article-holder').empty();
+    $.getJSON("/api/saved", function(data) {
+      $("#article-holder").append('<h1>Saved Articles</h1>')
+        // For each one
+        for (var i = 0; i < data.length; i++) {
+          // Display the apropos information on the page
+          $("#article-holder").append(
+            `<div class='article' id=${data[i]._id}>
+              <h3>${data[i].title}</h3>
+              <br>
+              <p>${data[i].summary}</p>
+              <a href='${data[i].link}' target='_blank' style='{color:red; font-size: 22px;}'>Read More</a></div>
+              <p>${data[i].comment}</p>
+              <a class='delete-it btn btn-danger' data-id='${data[i]._id}' href='/saved/delete${data[i]._id}'>Delete from Saved</a>
+              <a class='comment-it btn btn-danger' data-id='${data[i]._id}' href='/saved/comment${data[i]._id}'>Delete Comment</a>
+              </div>`)
 
-});
+        }
+      });
+    
+    });
   
-  
-  // Whenever someone clicks a p tag
+  // Whenever someone clicks save button
   $('#article-holder').on("click", ".save-it", function() {
     
     const thisId = $(this).attr('data-id')
@@ -25,9 +47,10 @@ $.getJSON("/articles", function(data) {
 
     $.ajax({
             method: "POST",
-            url: `/saved/${thisId}`,
+            url: "/saved/" + thisId,
             data: {
-              id: `${thisId}`
+              id: thisId,
+              saved: true
             }
           })
             // With that done
@@ -35,6 +58,10 @@ $.getJSON("/articles", function(data) {
               // Log the response
               console.log(data);
             });
+
+        $('.save-it').toggle();
+        $(thisId).append('<h2>Saved!</h2>')
+
     
   })
   

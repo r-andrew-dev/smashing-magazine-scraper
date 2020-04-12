@@ -28,6 +28,10 @@ const ArticleSchema = new Schema({
   saved: {
     type: Boolean,
     default: false
+  }, 
+  dateWritten: {
+      type: String,
+    required: true
   }
 }, {
   timestamps: true
