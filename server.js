@@ -4,8 +4,9 @@ const cheerio = require('cheerio')
 const axios = require('axios')
 const mongoose = require('mongoose')
 const logger = require('morgan')
+const port = process.env.PORT || 8080;
 
-const db = require('./models');
+// const db = require('./models');
 
 const app = express()
 
@@ -19,21 +20,62 @@ app.use(express.json());
 // Make public a static folder
 app.use(express.static("public"));
 
-// database connection options
+// Simple home page route
+app.get('/', function (req, res) {
+    res.sendFile(path.join(`${__dirname} ./public/index.html`))
+})
+
+// // database connection options
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadLines";
 
 // connecting to database
-mongoose.connect(MONGODB_URI);
 
-// URL: https://www.nbcnews.com/
-// Headline: Inside of div.class="info___1Xmsp pt3 pt0 ph4 info___2M8Ka   h2.span <span class="headline___38PFH">Missing Kennedy family member's husband pens tribute</span>
-// Summary: class="articleDek dekSummary___GcgCT
-// URLArticle: 
+mongoose.connect(
+        MONGODB_URI, {
+            useUnifiedTopology: true,
+            useNewUrlParser: true,
+        }).then(() => console.log('DB Connected!'))
+    .catch(err => {
+        console.log(`DB Connection Error: ${err.message}`)
+    })
 
-axios.get("https://www.nbcnews.com").then(function(response) {
+app.get('/scrape', function (req, res) {
 
-    const $ = cheerio.load(response.data);
-    
+    axios.get("https://www.smashingmagazine.com/articles/").then(function (response) {
+
+        const $ = cheerio.load(response.data);
 
 
+        $('article.article--post').each(function (i, elem) {
 
+            const result = {}
+
+            result.title = $(this).find("h1").text();
+            result.link = `https://www.smashingmagazine.com/${$(this)
+                        .find('h1').find('a').attr('href')}`;
+            result.summary = $(this).find('p').text();
+
+            if (!title || !link || !summary) {
+                console.log('error')
+            } else {
+
+                console.log(result)
+
+                db.Article.create(result)
+                    .then(function (dbArticle) {
+                        console.log(dbArticle)
+                    }).catch(function (err) {
+                        console.log(err)
+                    })
+            }
+
+        });
+
+        res.send('scrape complete!')
+
+    });
+
+});
+
+
+app.listen(port, () => console.log(`Listening on port ${port}`))

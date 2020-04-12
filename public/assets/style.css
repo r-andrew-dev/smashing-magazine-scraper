@@ -1,0 +1,33 @@
+* {
+    box-sizing: border-box;
+}
+ .navbar-custom {
+    background-color: rgb(21, 153, 38);
+}
+
+.navbar-brand-custom, .nav-link-custom {
+    color: seashell;
+}
+
+#smashing-top-image {
+    height: 60vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+#article-holder {
+    background-color: rgb(204, 59, 59);
+}
+
+#top-image {
+    position: relative;
+    text-align: center;
+    color: seashell;
+}
+
+.header-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
