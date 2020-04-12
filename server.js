@@ -70,6 +70,20 @@ app.get('/scrape', function (req, res) {
 
 });
 
+// Route for getting all Articles from the db
+app.get("/articles", function(req, res) {
+    // Grab every document in the Articles collection
+    db.Article.find({})
+      .then(function(dbArticle) {
+        // If we were able to successfully find Articles, send them back to the client
+        res.json(dbArticle);
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        res.json(err);
+      });
+  });
+
 
 // Route for getting all articles from the database.
 app.get("/saved", function(req, res) {
@@ -86,10 +100,38 @@ app.get("/saved", function(req, res) {
       });
   });
 
-// Simple home page route
-app.get('/', function (req, res) {
-    res.sendFile(path.join(`${__dirname} ./public/index.html`))
-})
+  app.get("/saved/:id", function(req, res) {
+
+    db.Article.findOne({ _id: req.params.id })
+      
+      .then(function() {
+        return db.Article.findOneAndUpdate({ _id: req.params.id }, {$set: {saved: true}});
+      })
+      .catch(function(err) {
+          res.json(err);
+      })
+
+    })
+
+
+    app.post('/comment:id', function(req, res) {
+    // Create a new note and pass the req.body to the entry
+    db.Comment.create(req.body)
+      .then(function(dbComment) {
+        // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
+        // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
+        // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+        return db.Article.findOneAndUpdate({ _id: req.params.id }, { comment: dbComment._id }, { new: true });
+      })
+      .then(function(dbArticle) {
+        // If we were able to successfully update an Article, send it back to the client
+        res.json(dbArticle);
+      })
+      .catch(function(err) {
+        // If an error occurred, send it to the client
+        res.json(err);
+      });
+  });
 
 
 app.listen(port, () => console.log(`Listening on port ${port}`))
