@@ -59,18 +59,12 @@ $('#article-holder').on("click", ".save-it", function () {
         id: thisId
       }
     })
-    // With that done
-    .then(function () {
-      console.log(this)
 
-    }).catch(function (err) {
-      console.log(err)
-    })
     $(`.article.${thisId} .save-it`).toggle();
     $(`.article.${thisId}`).append('<h5 class="text-success m-3">Article saved!</h5>')
 })
 
-// whenever someone clicks to delete an article, a POST request is sent to /api/saved:id
+// whenever someone clicks to delete an article from saved, a POST request is sent to /api/saved:id
 $('#article-holder').on("click", ".delete-it", function () {
 
   let thisId = $(this).attr('data-id')
@@ -83,14 +77,10 @@ $('#article-holder').on("click", ".delete-it", function () {
         id: thisId
       }
     })
-    // With that done
-    .then(function () {
 
-      $(`#${thisid}`).toggle();
+    $(`#${thisId}`).empty();
+    $(`#${thisId}`).append('<h3 class="removed text-success m-3">Removed from saved!</h3>')
 
-    }).catch(function (err) {
-      console.log(err)
-    })
 })
 
 $('#article-holder').on("click", ".comment-it", function () {

@@ -30,7 +30,7 @@ mongoose.connect(
       useUnifiedTopology: true,
       useNewUrlParser: true,
       useFindAndModify: false,
-      useCreateIndex: true
+      useCreateIndex: true,
     }).then(() => console.log('DB Connected!'))
   .catch(err => {
     console.log(`DB Connection Error: ${err.message}`)
@@ -49,7 +49,7 @@ app.get('/scrape', function (req, res) {
 
       result.title = $(this).find("h1").text();
       result.link = `https://www.smashingmagazine.com${$(this)
-                        .find('.read-more-link').attr('href')}`;
+                        .find('h1').find('a').attr('href')}`;
       result.summary = $(this).find('.article--post__teaser').text();
       result.dateWritten = $(this).find('time').attr('datetime');
 
@@ -70,7 +70,6 @@ app.get('/scrape', function (req, res) {
       db.Article.find({}).sort({
           dateWritten: -1
         })
-        .populate('Comment')
         .then(function (dbArticle) {
           res.json(dbArticle)
           console.log(dbArticle)
