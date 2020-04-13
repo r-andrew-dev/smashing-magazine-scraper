@@ -29,6 +29,8 @@ mongoose.connect(
     MONGODB_URI, {
       useUnifiedTopology: true,
       useNewUrlParser: true,
+      useFindAndModify: false,
+      useCreateIndex: true
     }).then(() => console.log('DB Connected!'))
   .catch(err => {
     console.log(`DB Connection Error: ${err.message}`)
@@ -139,6 +141,22 @@ app.post("/api/saved/:id", function (req, res) {
 
 })
 
+// Route for grabbing a specific Article by id, populate it with it's note
+app.get("/comment/:id", function(req, res) {
+  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
+  db.Article.findOne({ _id: req.params.id })
+    // ..and populate all of the notes associated with it
+    .populate("Comment")
+    .then(function(dbComment) {
+      // If we were able to successfully find an Article with the given id, send it back to the client
+      res.json(dbComment);
+    })
+    .catch(function(err) {
+      // If an error occurred, send it to the client
+      res.json(err);
+    });
+});
+
 
 app.post('/comment/:id', function (req, res) {
   // Create a new note and pass the req.body to the entry
@@ -164,5 +182,15 @@ app.post('/comment/:id', function (req, res) {
     });
 });
 
+app.post("/api/articles/:id", function (req, res) {
+  db.Comment.findOne({ _id: req.body.id })
+    .then(function (dbComment) {
+      return db.Comment.deleteOne(dbComment)
+    })
+    .catch(function (err) {
+      res.json(err);
+    })
+
+})
 
 app.listen(port, () => console.log(`Listening on port ${port}`))
