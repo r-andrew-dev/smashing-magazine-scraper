@@ -67,16 +67,16 @@ app.get('/scrape', function (req, res) {
     }).then(function () {
       db.Article.find({}).sort({
           dateWritten: -1
-        }).then(function (dbArticle) {
-          // If we were able to successfully find Articles, send them back to the client
-          res.json(dbArticle);
         })
-        .catch(function (err) {
+        .populate('Comment')
+        .then(function (dbArticle) {
+          res.json(dbArticle)
+          console.log(dbArticle)
+        }).catch(function (err) {
           // If an error occurred, send it to the client
           res.json(err);
 
         })
-
     })
   });
 
@@ -98,23 +98,6 @@ app.get("/api/articles", function (req, res) {
     });
 });
 
-// app.get("/saved", function (req, res) {
-//   // Grab every document in the Articles collection
-//   db.Article.find({})
-//     .sort({
-//       updatedAt: -1
-//     })
-//     .populate('Comment')
-//     .then(function (dbArticle) {
-//       // If we were able to successfully find Articles, send them back to the client
-//       res.json(dbArticle);
-//     })
-//     .catch(function (err) {
-//       // If an error occurred, send it to the client
-//       res.json(err);
-//     });
-// });
-
 app.get("/api/saved", function (req, res) {
   // Grab every document in the Articles collection
   db.Article.find({
@@ -134,56 +117,21 @@ app.get("/api/saved", function (req, res) {
     });
 });
 
-// // Route for getting all saved Articles from the db
-// app.post("/saved", function (req, res) {
-//   // Grab every document in the Articles collection
-//   db.Article.find({}).sort({
-//       dateWritten: -1
-//     })
-//     .then(function (dbArticle) {
-//       // If we were able to successfully find Articles, send them back to the client
-//       res.json(dbArticle);
-//     })
-//     .catch(function (err) {
-//       // If an error occurred, send it to the client
-//       res.json(err);
-//     });
-// });
-
-
-// Route for getting all saved articles from the database.
-app.get("/saved", function (req, res) {
-  // Grab every document in the Articles collection
-  db.Article.find({
-      saved: true
-    }).sort({
-      updatedAt: -1
-    })
-    .populate('Comment')
+app.post("/api/articles/:id", function (req, res) {
+  db.Article.findOne({ _id: req.body.id })
     .then(function (dbArticle) {
-      // If we were able to successfully find Articles, send them back to the client
-      res.json(dbArticle);
+      return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: true }, {new: true});
     })
     .catch(function (err) {
-      // If an error occurred, send it to the client
       res.json(err);
-    });
-});
-
-app.get("/saved/:id", function (req, res) {
-  console.log('made it here')
-  db.Article.findOne({
-      id: req.params.id
     })
 
-    .then(function () {
-      return db.Article.findOneAndUpdate({
-        _id: req.params.id
-      }, {
-        $set: {
-          saved: true
-        }
-      });
+})
+
+app.post("/api/saved/:id", function (req, res) {
+  db.Article.findOne({ _id: req.body.id })
+    .then(function (dbArticle) {
+      return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: false }, {new: true});
     })
     .catch(function (err) {
       res.json(err);
@@ -192,13 +140,12 @@ app.get("/saved/:id", function (req, res) {
 })
 
 
-app.post('/comment:id', function (req, res) {
+app.post('/comment/:id', function (req, res) {
   // Create a new note and pass the req.body to the entry
   db.Comment.create(req.body)
     .then(function (dbComment) {
-      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+      // If a Comment was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new comment
+      // { new: true } tells the query that we want it to return the updated value -- it returns the original by default
       return db.Article.findOneAndUpdate({
         _id: req.params.id
       }, {
