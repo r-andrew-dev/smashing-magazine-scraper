@@ -121,9 +121,9 @@ $('.save-comment').on("click", function () {
   let title = $("#titleinput").val()
   let body = $("#bodyinput").val()
 
-  if (!body || !title) {
-    $("#ModalTitle").text('Please fill in title and comment!')
-  }
+  if (body.length <6 || title.length < 6) {
+    $("#ModalTitle").text('Please fill in title and comment of at least five characters!')
+  } else {
   $.ajax({
       method: "POST",
       url: "/comment/" + thisId,
@@ -136,13 +136,16 @@ $('.save-comment').on("click", function () {
     })
     // With that done
     .then(function () {
-      $('#ModalTitle').text('Comment saved!')
-      $("#titleinput").empty()
-      $("#bodyinput").empty()
 
     }).catch(function (err) {
       console.log(err)
     })
+
+    $('#ModalTitle').text('Comment saved!');
+      $("#titleinput").val('');
+      $("#bodyinput").val('');
+
+  }
 })
 
 $('#notes').on('click', '.delete-comment', function () {
