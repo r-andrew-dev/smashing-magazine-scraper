@@ -67,9 +67,11 @@ app.get('/scrape', function (req, res) {
     }).then(function () {
       db.Article.find({}).sort({
           dateWritten: -1
-        }).then(function (dbArticle) {
+        })
+        .populate('Comment')
+        .then(function (dbArticle) {
           res.json(dbArticle)
-          
+          console.log(dbArticle)
         }).catch(function (err) {
           // If an error occurred, send it to the client
           res.json(err);

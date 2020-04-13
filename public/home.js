@@ -1,30 +1,45 @@
-$('#scrape').on('click', function() {
+$('#scrape').on('click', function () {
   $('#article-holder').empty();
-  $.getJSON("/scrape", function(data) {
-      for (var i = 0; i < data.length; i++) {
-        // Display the apropos information on the page
-        $("#article-holder").append(
-          `<div class='article ${data[i]._id}'>
+  $.getJSON("/scrape", function (data) {
+    for (var i = 0; i < data.length; i++) {
+      // Display the apropos information on the page
+      $("#article-holder").append(
+        `<div class='article ${data[i]._id}'>
             <h3>${data[i].title}</h3>
             <br>
             <p>${data[i].summary}</p>
             <a href='${data[i].link}' target='_blank'>Read More</a></div>
             <button class='save-it ${data[i]._id} btn btn-danger' data-id='${data[i]._id}'>Save</button>
             </div>`)
+
+      if (!data[i].comment) {
+        $('#article-holder').append("<div class='comments'>No Comments Currently</div>")
+      } else {
+        for (var j = 0; j < data[i].comment.length; j++) {
+
+          $('#article-holder').append(`<div class='comment' data-id='${data[i].comment[j]._id}'>
+                  <h3 class='comment-title'>${data[i].comment[j].title}</h3>
+                  <p>${data[i].comment[j].body}</p>
+                  <button class='btn btn-danger' data-id='${data[i].comment[j]._id}'>Delete Comment</button>
+                <div>`)
+
+          }
+        }
       }
-    });
-  
+
   });
-  
-  $('#saved').on('click', function() {
-    $('#article-holder').empty();
-    $.getJSON("/api/saved", function(data) {
-      $("#article-holder").append('<h1>Saved Articles</h1>')
-        // For each one
-        for (var i = 0; i < data.length; i++) {
-          // Display the apropos information on the page
-          $("#article-holder").append(
-            `<div class='article' id='${data[i]._id}'>
+
+});
+
+$('#saved').on('click', function () {
+  $('#article-holder').empty();
+  $.getJSON("/api/saved", function (data) {
+    $("#article-holder").append('<h1>Saved Articles</h1>')
+    // For each one
+    for (var i = 0; i < data.length; i++) {
+      // Display the apropos information on the page
+      $("#article-holder").append(
+        `<div class='article' id='${data[i]._id}'>
               <h3>${data[i].title}</h3>
               <br>
               <p>${data[i].summary}</p>
@@ -34,96 +49,96 @@ $('#scrape').on('click', function() {
               <button class='comment-it btn btn-danger' data-toggle="modal" data-target="#exampleModalCenter" data-id='${data[i]._id}'>Comment</button>
               </div>`)
 
-        }
-      });
-    
-    });
-  
-  // Whenever someone clicks save button
-  $('#article-holder').on("click", ".save-it", function() {
-    
-    const thisId = $(this).attr('data-id')
-    console.log(thisId)
-
-    $.ajax({
-            method: "POST",
-            url: "/api/articles/" + thisId,
-            data: {
-              id: thisId
-            }
-          })
-            // With that done
-            .then(function() {
-
-        $(`.save-it ${thisId}`).toggle();
-        $(`.article ${thisId}`).append('<h2>Saved!</h2>')
-
-            }).catch(function(err) {
-              console.log(err)
-            })
-  })
-  
-  // whenever someone clicks to delete an article, a POST request is sent to /api/saved:id
-  $('#article-holder').on("click", ".delete-it", function() {
-    
-    const thisId = $(this).attr('data-id')
-    console.log(thisId)
-
-    $.ajax({
-            method: "POST",
-            url: "/api/saved/:id" + thisId,
-            data: {
-              id: thisId
-            }
-          })
-            // With that done
-            .then(function() {
-
-        $(`#${thisid}`).toggle();
-
-            }).catch(function(err) {
-              console.log(err)
-            })
-  })
-
-  $('#article-holder').on("click", ".comment-it", function() {
-
-    const thisId = $(this).attr('data-id')
-
-    $('.save-it').attr('data-id', `${thisId}`)
-
-  })
-  
-   // whenever someone clicks to delete an article, a POST request is sent to /api/comment:id
-   $('.save-it').on("click", function() {
-    
-    const thisId = $(this).attr('data-id')
-    const title = $("#titleinput").val()
-    const body = $("#bodyinput").val()
-
-    if (!body || !title) {
-      $("#ModalTitle").text('Please fill in title and comment!')
     }
-    $.ajax({
-            method: "POST",
-            url: "/comment/" + thisId,
-            data: {
-               // Value taken from title input
-              title: title,
-              // Value taken from note textarea
-              body: body
-            }
-          })
-            // With that done
-            .then(function() {
-            $('#ModalTitle').text('Comment saved!')  
-            $("#titleinput").empty()
-            $("#bodyinput").empty()
+  });
 
-            }).catch(function(err) {
-              console.log(err)
-            })
-  })
+});
+
+// Whenever someone clicks save button
+$('#article-holder').on("click", ".save-it", function () {
+
+  const thisId = $(this).attr('data-id')
+  console.log(thisId)
+
+  $.ajax({
+      method: "POST",
+      url: "/api/articles/" + thisId,
+      data: {
+        id: thisId
+      }
+    })
+    // With that done
+    .then(function () {
+
+      $(`.save-it ${thisId}`).toggle();
+      $(`.article ${thisId}`).append('<h2>Saved!</h2>')
+
+    }).catch(function (err) {
+      console.log(err)
+    })
+})
+
+// whenever someone clicks to delete an article, a POST request is sent to /api/saved:id
+$('#article-holder').on("click", ".delete-it", function () {
+
+  const thisId = $(this).attr('data-id')
+  console.log(thisId)
+
+  $.ajax({
+      method: "POST",
+      url: "/api/saved/:id" + thisId,
+      data: {
+        id: thisId
+      }
+    })
+    // With that done
+    .then(function () {
+
+      $(`#${thisid}`).toggle();
+
+    }).catch(function (err) {
+      console.log(err)
+    })
+})
+
+$('#article-holder').on("click", ".comment-it", function () {
+
+  const thisId = $(this).attr('data-id')
+
+  $('.save-it').attr('data-id', `${thisId}`)
+
+})
+
+// whenever someone clicks to delete an article, a POST request is sent to /api/comment:id
+$('.save-it').on("click", function () {
+
+  const thisId = $(this).attr('data-id')
+  const title = $("#titleinput").val()
+  const body = $("#bodyinput").val()
+
+  if (!body || !title) {
+    $("#ModalTitle").text('Please fill in title and comment!')
+  }
+  $.ajax({
+      method: "POST",
+      url: "/comment/" + thisId,
+      data: {
+        // Value taken from title input
+        title: title,
+        // Value taken from note textarea
+        body: body
+      }
+    })
+    // With that done
+    .then(function () {
+      $('#ModalTitle').text('Comment saved!')
+      $("#titleinput").empty()
+      $("#bodyinput").empty()
+
+    }).catch(function (err) {
+      console.log(err)
+    })
+})
 
 
 //     // Now make an ajax call for the Article
@@ -142,7 +157,7 @@ $('#scrape').on('click', function() {
 //         $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
 //         // A button to submit a new note, with the id of the article saved to it
 //         $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
-  
+
 //         // If there's a note in the article
 //         if (data.note) {
 //           // Place the title of the note in the title input
@@ -152,12 +167,12 @@ $('#scrape').on('click', function() {
 //         }
 //       });
 //   });
-  
+
 //   // When you click the savenote button
 //   $(document).on("click", "#savenote", function() {
 //     // Grab the id associated with the article from the submit button
 //     var thisId = $(this).attr("data-id");
-  
+
 //     // Run a POST request to change the note, using what's entered in the inputs
 //     $.ajax({
 //       method: "POST",
@@ -176,9 +191,8 @@ $('#scrape').on('click', function() {
 //         // Empty the notes section
 //         $("#notes").empty();
 //       });
-  
+
 //     // Also, remove the values entered in the input and textarea for note entry
 //     $("#titleinput").val("");
 //     $("#bodyinput").val("");
 //   });
-  
