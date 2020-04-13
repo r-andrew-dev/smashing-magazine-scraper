@@ -116,8 +116,6 @@ app.get("/api/saved", function (req, res) {
 });
 
 app.post("/api/articles/:id", function (req, res) {
-  console.log(req)
-  console.log('made it here')
   db.Article.findOne({ _id: req.body.id })
     .then(function (dbArticle) {
       return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: true }, {new: true});
@@ -129,8 +127,6 @@ app.post("/api/articles/:id", function (req, res) {
 })
 
 app.post("/api/saved/:id", function (req, res) {
-  console.log(req)
-  console.log('made it here')
   db.Article.findOne({ _id: req.body.id })
     .then(function (dbArticle) {
       return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: false }, {new: true});
@@ -142,13 +138,12 @@ app.post("/api/saved/:id", function (req, res) {
 })
 
 
-app.post('/comment:id', function (req, res) {
+app.post('/comment/:id', function (req, res) {
   // Create a new note and pass the req.body to the entry
   db.Comment.create(req.body)
     .then(function (dbComment) {
-      // If a Note was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Note
-      // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
-      // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
+      // If a Comment was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new comment
+      // { new: true } tells the query that we want it to return the updated value -- it returns the original by default
       return db.Article.findOneAndUpdate({
         _id: req.params.id
       }, {

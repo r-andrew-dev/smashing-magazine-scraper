@@ -24,14 +24,14 @@ $('#scrape').on('click', function() {
         for (var i = 0; i < data.length; i++) {
           // Display the apropos information on the page
           $("#article-holder").append(
-            `<div class='article' id=${data[i]._id}>
+            `<div class='article' id='${data[i]._id}'>
               <h3>${data[i].title}</h3>
               <br>
               <p>${data[i].summary}</p>
               <a href='${data[i].link}' target='_blank' style='{color:red; font-size: 22px;}'>Read More</a></div>
               <p>${data[i].comment}</p>
               <button class='delete-it btn btn-danger' data-id='${data[i]._id}'>Delete from Saved</button>
-              <button class='comment-it btn btn-danger' data-toggle="modal" data-target="#exampleModalCenter" data-id='${data[i]._id}''>Comment</button>
+              <button class='comment-it btn btn-danger' data-toggle="modal" data-target="#exampleModalCenter" data-id='${data[i]._id}'>Comment</button>
               </div>`)
 
         }
@@ -85,7 +85,45 @@ $('#scrape').on('click', function() {
               console.log(err)
             })
   })
+
+  $('#article-holder').on("click", ".comment-it", function() {
+
+    const thisId = $(this).attr('data-id')
+
+    $('.save-it').attr('data-id', `${thisId}`)
+
+  })
   
+   // whenever someone clicks to delete an article, a POST request is sent to /api/comment:id
+   $('.save-it').on("click", function() {
+    
+    const thisId = $(this).attr('data-id')
+    const title = $("#titleinput").val()
+    const body = $("#bodyinput").val()
+
+    if (!body || !title) {
+      $("#ModalTitle").text('Please fill in title and comment!')
+    }
+    $.ajax({
+            method: "POST",
+            url: "/comment/" + thisId,
+            data: {
+               // Value taken from title input
+              title: title,
+              // Value taken from note textarea
+              body: body
+            }
+          })
+            // With that done
+            .then(function() {
+            $('#ModalTitle').text('Comment saved!')  
+            $("#titleinput").empty()
+            $("#bodyinput").empty()
+
+            }).catch(function(err) {
+              console.log(err)
+            })
+  })
 
 
 //     // Now make an ajax call for the Article
