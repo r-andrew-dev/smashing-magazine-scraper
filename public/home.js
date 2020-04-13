@@ -30,8 +30,8 @@ $('#scrape').on('click', function() {
               <p>${data[i].summary}</p>
               <a href='${data[i].link}' target='_blank' style='{color:red; font-size: 22px;}'>Read More</a></div>
               <p>${data[i].comment}</p>
-              <a class='delete-it btn btn-danger' data-id='${data[i]._id}' href='/saved/delete${data[i]._id}'>Delete from Saved</a>
-              <a class='comment-it btn btn-danger' data-id='${data[i]._id}' href='/saved/comment${data[i]._id}'>Delete Comment</a>
+              <button class='delete-it btn btn-danger' data-id='${data[i]._id}'>Delete from Saved</button>
+              <button class='comment-it btn btn-danger' data-id='${data[i]._id}' href='/saved/comment${data[i]._id}'>Delete Comment</button>
               </div>`)
 
         }
@@ -57,6 +57,29 @@ $('#scrape').on('click', function() {
 
         $(`.save-it ${thisId}`).toggle();
         $(`.article ${thisId}`).append('<h2>Saved!</h2>')
+
+            }).catch(function(err) {
+              console.log(err)
+            })
+  })
+  
+  // whenever someone clicks to delete an article, a POST request is sent to /api/saved:id
+  $('#article-holder').on("click", ".delete-it", function() {
+    
+    const thisId = $(this).attr('data-id')
+    console.log(thisId)
+
+    $.ajax({
+            method: "POST",
+            url: "/api/saved/:id" + thisId,
+            data: {
+              id: thisId
+            }
+          })
+            // With that done
+            .then(function() {
+
+        $(`#${thisid}`).toggle();
 
             }).catch(function(err) {
               console.log(err)

@@ -128,6 +128,19 @@ app.post("/api/articles/:id", function (req, res) {
 
 })
 
+app.post("/api/saved/:id", function (req, res) {
+  console.log(req)
+  console.log('made it here')
+  db.Article.findOne({ _id: req.body.id })
+    .then(function (dbArticle) {
+      return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: false }, {new: true});
+    })
+    .catch(function (err) {
+      res.json(err);
+    })
+
+})
+
 
 app.post('/comment:id', function (req, res) {
   // Create a new note and pass the req.body to the entry
