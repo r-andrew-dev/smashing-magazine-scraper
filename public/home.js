@@ -4,12 +4,12 @@ $('#scrape').on('click', function() {
       for (var i = 0; i < data.length; i++) {
         // Display the apropos information on the page
         $("#article-holder").append(
-          `<div class='article'>
+          `<div class='article ${data[i]._id}'>
             <h3>${data[i].title}</h3>
             <br>
             <p>${data[i].summary}</p>
             <a href='${data[i].link}' target='_blank'>Read More</a></div>
-            <a class='save-it btn btn-danger' data-id='${data[i]._id}' href='/saved${data[i]._id}'>Save</a>
+            <button class='save-it ${data[i]._id} btn btn-danger' data-id='${data[i]._id}'>Save</button>
             </div>`)
       }
     });
@@ -47,22 +47,20 @@ $('#scrape').on('click', function() {
 
     $.ajax({
             method: "POST",
-            url: "/saved/" + thisId,
+            url: "/api/articles/" + thisId,
             data: {
-              id: thisId,
-              saved: true
+              id: thisId
             }
           })
             // With that done
-            .then(function(data) {
-              // Log the response
-              console.log(data);
-            });
+            .then(function() {
 
-        $('.save-it').toggle();
-        $(thisId).append('<h2>Saved!</h2>')
+        $(`.save-it ${thisId}`).toggle();
+        $(`.article ${thisId}`).append('<h2>Saved!</h2>')
 
-    
+            }).catch(function(err) {
+              console.log(err)
+            })
   })
   
 //     // Now make an ajax call for the Article

@@ -68,15 +68,13 @@ app.get('/scrape', function (req, res) {
       db.Article.find({}).sort({
           dateWritten: -1
         }).then(function (dbArticle) {
-          // If we were able to successfully find Articles, send them back to the client
-          res.json(dbArticle);
-        })
-        .catch(function (err) {
+          res.json(dbArticle)
+          
+        }).catch(function (err) {
           // If an error occurred, send it to the client
           res.json(err);
 
         })
-
     })
   });
 
@@ -98,23 +96,6 @@ app.get("/api/articles", function (req, res) {
     });
 });
 
-// app.get("/saved", function (req, res) {
-//   // Grab every document in the Articles collection
-//   db.Article.find({})
-//     .sort({
-//       updatedAt: -1
-//     })
-//     .populate('Comment')
-//     .then(function (dbArticle) {
-//       // If we were able to successfully find Articles, send them back to the client
-//       res.json(dbArticle);
-//     })
-//     .catch(function (err) {
-//       // If an error occurred, send it to the client
-//       res.json(err);
-//     });
-// });
-
 app.get("/api/saved", function (req, res) {
   // Grab every document in the Articles collection
   db.Article.find({
@@ -134,56 +115,12 @@ app.get("/api/saved", function (req, res) {
     });
 });
 
-// // Route for getting all saved Articles from the db
-// app.post("/saved", function (req, res) {
-//   // Grab every document in the Articles collection
-//   db.Article.find({}).sort({
-//       dateWritten: -1
-//     })
-//     .then(function (dbArticle) {
-//       // If we were able to successfully find Articles, send them back to the client
-//       res.json(dbArticle);
-//     })
-//     .catch(function (err) {
-//       // If an error occurred, send it to the client
-//       res.json(err);
-//     });
-// });
-
-
-// Route for getting all saved articles from the database.
-app.get("/saved", function (req, res) {
-  // Grab every document in the Articles collection
-  db.Article.find({
-      saved: true
-    }).sort({
-      updatedAt: -1
-    })
-    .populate('Comment')
-    .then(function (dbArticle) {
-      // If we were able to successfully find Articles, send them back to the client
-      res.json(dbArticle);
-    })
-    .catch(function (err) {
-      // If an error occurred, send it to the client
-      res.json(err);
-    });
-});
-
-app.get("/saved/:id", function (req, res) {
+app.post("/api/articles/:id", function (req, res) {
+  console.log(req)
   console.log('made it here')
-  db.Article.findOne({
-      id: req.params.id
-    })
-
-    .then(function () {
-      return db.Article.findOneAndUpdate({
-        _id: req.params.id
-      }, {
-        $set: {
-          saved: true
-        }
-      });
+  db.Article.findOne({ _id: req.body.id })
+    .then(function (dbArticle) {
+      return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: true }, {new: true});
     })
     .catch(function (err) {
       res.json(err);
