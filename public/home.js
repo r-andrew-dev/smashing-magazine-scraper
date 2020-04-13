@@ -1,64 +1,56 @@
+// When user clicks scrape articles
 $('#scrape').on('click', function () {
   $('#article-holder').empty();
   $.getJSON("/scrape", function (data) {
     for (var i = 0; i < data.length; i++) {
-      // Display the apropos information on the page
+      // Display each of the articles in cards
       $("#article-holder").append(
-        `<div class='article ${data[i]._id}'>
-            <h3>${data[i].title}</h3>
-            <br>
-            <p>${data[i].summary}</p>
-            <a href='${data[i].link}' target='_blank'>Read More</a></div>
-            <button class='save-it ${data[i]._id} btn btn-danger' data-id='${data[i]._id}'>Save</button>
+        `<div class='article ${data[i]._id} card border-success mb-3'>
+            <h5 class="card-header bg-success">${data[i].title}</h5>
+            <p class='card-text text-success ml-3 mt-3' style='font-size:22px;'>${data[i].summary}</p>
+            <a class='ml-3 pb-3' href='${data[i].link}' target='_blank'>Read More</a><br><br>
+            </div>
+          </div>`)
+      // If the article is not saved, append a button to save it
+      if (!data[i].saved) {
+        $(`.article.${data[i]._id}`).append(`
+            <button class='save-it ${data[i]._id} btn btn-danger m-3' data-id='${data[i]._id}'>Save</button>
             </div>`)
-
-      if (!data[i].comment) {
-        $('#article-holder').append("<div class='comments'>No Comments Currently</div>")
+      // else append an h5 stating it is already saved. 
       } else {
-        for (var j = 0; j < data[i].comment.length; j++) {
-
-          $('#article-holder').append(`<div class='comment' data-id='${data[i].comment[j]._id}'>
-                  <h3 class='comment-title'>${data[i].comment[j].title}</h3>
-                  <p>${data[i].comment[j].body}</p>
-                  <button class='btn btn-danger' data-id='${data[i].comment[j]._id}'>Delete Comment</button>
-                <div>`)
-
-          }
-        }
+        $(`.article.${data[i]._id}`).append('<h5 class="text-success m-3">Article saved!</h5>')
       }
+    }
 
   });
 
 });
 
+// when user clicks link to saved articles 
 $('#saved').on('click', function () {
   $('#article-holder').empty();
   $.getJSON("/api/saved", function (data) {
     $("#article-holder").append('<h1>Saved Articles</h1>')
     // For each one
     for (var i = 0; i < data.length; i++) {
-      // Display the apropos information on the page
+      // Display all articles where saved: true;
       $("#article-holder").append(
-        `<div class='article' id='${data[i]._id}'>
-              <h3>${data[i].title}</h3>
-              <br>
-              <p>${data[i].summary}</p>
-              <a href='${data[i].link}' target='_blank' style='{color:red; font-size: 22px;}'>Read More</a></div>
-              <p>${data[i].comment}</p>
-              <button class='delete-it btn btn-danger' data-id='${data[i]._id}'>Delete from Saved</button>
-              <button class='comment-it btn btn-danger' data-toggle="modal" data-target="#exampleModalCenter" data-id='${data[i]._id}'>Comment</button>
+        `<div class='article card border-success mb-3' id='${data[i]._id}'>
+              <h5 class='card-header bg-success'>${data[i].title}</h5>
+              <p class='card-text text-success ml-3 mt-3' style='font-size:22px;'>${data[i].summary}</p>
+              <a href='${data[i].link}' target='_blank' class='ml-3 pb-3'}'>Read More</a><br><br>
+              <button class='delete-it btn btn-danger m-3' data-id='${data[i]._id}'>Delete from Saved</button>
+              <button class='comment-it btn btn-danger m-3' data-toggle="modal" data-target="#exampleModalCenter" data-comment='${data[i].comment}' data-id='${data[i]._id}'>Comments</button>
               </div>`)
-
     }
   });
 
 });
 
-// Whenever someone clicks save button
+// Whenever someone clicks save button on an article
 $('#article-holder').on("click", ".save-it", function () {
 
-  const thisId = $(this).attr('data-id')
-  console.log(thisId)
+  let thisId = $(this).attr('data-id')
 
   $.ajax({
       method: "POST",
@@ -67,21 +59,15 @@ $('#article-holder').on("click", ".save-it", function () {
         id: thisId
       }
     })
-    // With that done
-    .then(function () {
 
-      $(`.save-it ${thisId}`).toggle();
-      $(`.article ${thisId}`).append('<h2>Saved!</h2>')
-
-    }).catch(function (err) {
-      console.log(err)
-    })
+    $(`.article.${thisId} .save-it`).toggle();
+    $(`.article.${thisId}`).append('<h5 class="text-success m-3">Article saved!</h5>')
 })
 
-// whenever someone clicks to delete an article, a POST request is sent to /api/saved:id
+// whenever someone clicks to delete an article from saved, a POST request is sent to /api/saved:id
 $('#article-holder').on("click", ".delete-it", function () {
 
-  const thisId = $(this).attr('data-id')
+  let thisId = $(this).attr('data-id')
   console.log(thisId)
 
   $.ajax({
@@ -91,34 +77,53 @@ $('#article-holder').on("click", ".delete-it", function () {
         id: thisId
       }
     })
-    // With that done
-    .then(function () {
 
-      $(`#${thisid}`).toggle();
+    $(`#${thisId}`).empty();
+    $(`#${thisId}`).append('<h3 class="removed text-success m-3">Removed from saved!</h3>')
 
-    }).catch(function (err) {
-      console.log(err)
-    })
 })
 
 $('#article-holder').on("click", ".comment-it", function () {
 
-  const thisId = $(this).attr('data-id')
+  let thisId = $(this).attr('data-id')
 
-  $('.save-it').attr('data-id', `${thisId}`)
+  $('.save-comment').attr('data-id', `${thisId}`)
 
-})
+  // Empty the notes from the note section
+  $("#notes").empty();
 
-// whenever someone clicks to delete an article, a POST request is sent to /api/comment:id
-$('.save-it').on("click", function () {
+  // Now make an ajax call for the Article
+  $.ajax({
+      method: "GET",
+      url: "/articles/" + thisId
+    })
+    // With that done, add the note information to the page
+    .then(function (data) {
+      console.log(data);
+      // The title of the article
+      $("#notes").append("<h2>" + data.title + "</h2>");
+      // If there's a note in the article
+      if (data.comment) {
+        for (var i = 0; i < data.comment.length; i++) {
+          $('#notes').append(`<div id='${data.comment[i]._id}'><h4>${data.comment[i].title}</h4>
+        <p>${data.comment[i].body}</p>
+        <button class='delete-comment btn btn-danger' data-id='${data.comment[i]._id}>X</button>
+        </div>`)
+        }
+      }
+    });
+});
 
-  const thisId = $(this).attr('data-id')
-  const title = $("#titleinput").val()
-  const body = $("#bodyinput").val()
+// whenever someone clicks save an article comment, a POST request is sent to /api/comment:id
+$('.save-comment').on("click", function () {
 
-  if (!body || !title) {
-    $("#ModalTitle").text('Please fill in title and comment!')
-  }
+  let thisId = $(this).attr('data-id')
+  let title = $("#titleinput").val()
+  let body = $("#bodyinput").val()
+
+  if (body.length <6 || title.length < 6) {
+    $("#ModalTitle").text('Please fill in title and comment of at least five characters!')
+  } else {
   $.ajax({
       method: "POST",
       url: "/comment/" + thisId,
@@ -131,68 +136,36 @@ $('.save-it').on("click", function () {
     })
     // With that done
     .then(function () {
-      $('#ModalTitle').text('Comment saved!')
-      $("#titleinput").empty()
-      $("#bodyinput").empty()
+
+    }).catch(function (err) {
+      console.log(err)
+    })
+
+    $('#ModalTitle').text('Comment saved!');
+      $("#titleinput").val('');
+      $("#bodyinput").val('');
+
+  }
+})
+
+$('#notes').on('click', '.delete-comment', function () {
+
+  let thisId = $(this).attr('data-id')
+
+  $.ajax({
+      method: "POST",
+      url: "/comment/delete/" + thisId,
+      data: {
+        // Value taken from title input
+        id: thisId
+      }
+    })
+    // With that done
+    .then(function () {
+      $('#ModalTitle').text('Comment deleted!')
+      $(`#${thisId}`).hide();
 
     }).catch(function (err) {
       console.log(err)
     })
 })
-
-
-//     // Now make an ajax call for the Article
-//     $.ajax({
-//       method: "GET",
-//       url: "/articles/" + thisId
-//     })
-//       // With that done, add the note information to the page
-//       .then(function(data) {
-//         console.log(data);
-//         // The title of the article
-//         $("#notes").append("<h2>" + data.title + "</h2>");
-//         // An input to enter a new title
-//         $("#notes").append("<input id='titleinput' name='title' >");
-//         // A textarea to add a new note body
-//         $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
-//         // A button to submit a new note, with the id of the article saved to it
-//         $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
-
-//         // If there's a note in the article
-//         if (data.note) {
-//           // Place the title of the note in the title input
-//           $("#titleinput").val(data.note.title);
-//           // Place the body of the note in the body textarea
-//           $("#bodyinput").val(data.note.body);
-//         }
-//       });
-//   });
-
-//   // When you click the savenote button
-//   $(document).on("click", "#savenote", function() {
-//     // Grab the id associated with the article from the submit button
-//     var thisId = $(this).attr("data-id");
-
-//     // Run a POST request to change the note, using what's entered in the inputs
-//     $.ajax({
-//       method: "POST",
-//       url: "/articles/" + thisId,
-//       data: {
-//         // Value taken from title input
-//         title: $("#titleinput").val(),
-//         // Value taken from note textarea
-//         body: $("#bodyinput").val()
-//       }
-//     })
-//       // With that done
-//       .then(function(data) {
-//         // Log the response
-//         console.log(data);
-//         // Empty the notes section
-//         $("#notes").empty();
-//       });
-
-//     // Also, remove the values entered in the input and textarea for note entry
-//     $("#titleinput").val("");
-//     $("#bodyinput").val("");
-//   });

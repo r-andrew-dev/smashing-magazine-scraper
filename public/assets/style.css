@@ -9,15 +9,27 @@
     color: seashell;
 }
 
+.card {
+
+    display: block;
+    float: left;
+
+}
+
+.removed {
+
+    width: 100vw;
+    
+}
 #smashing-top-image {
-    height: 30vh;
+    height: 70vh;
     width: 100%;
     overflow: hidden;
 }
 
 #article-holder {
-    background-color: rgb(21, 153, 38);
     color: seashell;
+    background-color: #343B46
 }
 
 #top-image {
@@ -31,5 +43,6 @@
     top: 50%;
     left: 45%;
     transform: translate(-50%, -50%);
-    background-color: #343B46
+    background-color: #343B46;
+    padding: 5%;
 }
