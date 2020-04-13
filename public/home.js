@@ -1,8 +1,9 @@
+// When user clicks scrape articles
 $('#scrape').on('click', function () {
   $('#article-holder').empty();
   $.getJSON("/scrape", function (data) {
     for (var i = 0; i < data.length; i++) {
-      // Display the apropos information on the page
+      // Display each of the articles in cards
       $("#article-holder").append(
         `<div class='article ${data[i]._id} card border-success mb-3'>
             <h5 class="card-header bg-success">${data[i].title}</h5>
@@ -10,12 +11,14 @@ $('#scrape').on('click', function () {
             <a class='ml-3 pb-3' href='${data[i].link}' target='_blank'>Read More</a><br><br>
             </div>
           </div>`)
+      // If the article is not saved, append a button to save it
       if (!data[i].saved) {
         $(`.article.${data[i]._id}`).append(`
             <button class='save-it ${data[i]._id} btn btn-danger m-3' data-id='${data[i]._id}'>Save</button>
             </div>`)
+      // else append an h5 stating it is already saved. 
       } else {
-        $(`.article.${data[i]._id}`).append('<h5 class="text-success m-3">Article already saved!</h5>')
+        $(`.article.${data[i]._id}`).append('<h5 class="text-success m-3">Article saved!</h5>')
       }
     }
 
@@ -23,13 +26,14 @@ $('#scrape').on('click', function () {
 
 });
 
+// when user clicks link to saved articles 
 $('#saved').on('click', function () {
   $('#article-holder').empty();
   $.getJSON("/api/saved", function (data) {
     $("#article-holder").append('<h1>Saved Articles</h1>')
     // For each one
     for (var i = 0; i < data.length; i++) {
-      // Display the apropos information on the page
+      // Display all articles where saved: true;
       $("#article-holder").append(
         `<div class='article card border-success mb-3' id='${data[i]._id}'>
               <h5 class='card-header bg-success'>${data[i].title}</h5>
@@ -43,11 +47,10 @@ $('#saved').on('click', function () {
 
 });
 
-// Whenever someone clicks save button
+// Whenever someone clicks save button on an article
 $('#article-holder').on("click", ".save-it", function () {
 
   let thisId = $(this).attr('data-id')
-  console.log(thisId)
 
   $.ajax({
       method: "POST",
@@ -59,12 +62,12 @@ $('#article-holder').on("click", ".save-it", function () {
     // With that done
     .then(function () {
       console.log(this)
-      $(`.${thisId}`).hide();
-      $(`.article .${thisId}`).append('<h2>Saved!</h2>')
 
     }).catch(function (err) {
       console.log(err)
     })
+    $(`.article.${thisId} .save-it`).toggle();
+    $(`.article.${thisId}`).append('<h5 class="text-success m-3">Article saved!</h5>')
 })
 
 // whenever someone clicks to delete an article, a POST request is sent to /api/saved:id
