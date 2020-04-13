@@ -31,7 +31,7 @@ $('#scrape').on('click', function() {
               <a href='${data[i].link}' target='_blank' style='{color:red; font-size: 22px;}'>Read More</a></div>
               <p>${data[i].comment}</p>
               <button class='delete-it btn btn-danger' data-id='${data[i]._id}'>Delete from Saved</button>
-              <button class='comment-it btn btn-danger' data-id='${data[i]._id}' href='/saved/comment${data[i]._id}'>Delete Comment</button>
+              <button class='comment-it btn btn-danger' data-toggle="modal" data-target="#exampleModalCenter" data-id='${data[i]._id}''>Comment</button>
               </div>`)
 
         }
@@ -86,6 +86,8 @@ $('#scrape').on('click', function() {
             })
   })
   
+
+
 //     // Now make an ajax call for the Article
 //     $.ajax({
 //       method: "GET",
