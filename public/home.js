@@ -2,6 +2,7 @@
 $('#scrape').on('click', function () {
   $('#article-holder').empty();
   $.getJSON("/scrape", function (data) {
+    console.log(data)
     for (var i = 0; i < data.length; i++) {
       // Display each of the articles in cards
       $("#article-holder").append(
@@ -90,28 +91,33 @@ $('#article-holder').on("click", ".comment-it", function () {
   $('.save-comment').attr('data-id', `${thisId}`)
 
   // Empty the notes from the note section
-  $("#notes").empty();
+  $("#comments").empty();
 
   // Now make an ajax call for the Article
   $.ajax({
       method: "GET",
-      url: "/articles/" + thisId
+      url: "/comment/" + thisId
     })
     // With that done, add the note information to the page
     .then(function (data) {
       console.log(data);
       // The title of the article
-      $("#notes").append("<h2>" + data.title + "</h2>");
+      $("#comments").append(`<h2>${data.title}</h2>`);
       // If there's a note in the article
-      if (data.comment) {
-        for (var i = 0; i < data.comment.length; i++) {
-          $('#notes').append(`<div id='${data.comment[i]._id}'><h4>${data.comment[i].title}</h4>
-        <p>${data.comment[i].body}</p>
-        <button class='delete-comment btn btn-danger' data-id='${data.comment[i]._id}>X</button>
+      if (data.comments.title) {
+        for (var i = 0; i < data.comments.length; i++) {
+          $('#comments').append(`<div id='${data.comments[i]._id}'><h4>${data.comments[i].title}</h4>
+        <p>${data.comments[i].body}</p>
+        <button class='delete-comment btn btn-danger' data-id='${data.comments[i]._id}>X</button>
         </div>`)
         }
       }
-    });
+    }).catch(function(err) {
+      if (err) {
+        console.log(err)
+
+      }
+    })
 });
 
 // whenever someone clicks save an article comment, a POST request is sent to /api/comment:id
@@ -128,6 +134,7 @@ $('.save-comment').on("click", function () {
       method: "POST",
       url: "/comment/" + thisId,
       data: {
+        id: thisId,
         // Value taken from title input
         title: title,
         // Value taken from note textarea

@@ -57,29 +57,42 @@ app.get('/scrape', function (req, res) {
         console.log(result.link, result.summary)
 
         console.log('error')
-        return
-      } 
+      }
 
-        console.log(result.summary)
-      
-    })
-    
-  }).then(function (result) {
-      db.Article.create(result)
-    }).then(function () {
-      db.Article.find({}).sort({
-          dateWritten: -1
-        })
-        .then(function (dbArticle) {
-          res.json(dbArticle)
-          console.log(dbArticle)
-        }).catch(function (err) {
-          // If an error occurred, send it to the client
-          res.json(err);
+        console.log(result.summary, result.link)
 
-        })
+
+
+        db.Article.create(result)
+
+          .then(function () {
+            db.Article.find({}).sort({
+              dateWritten: -1
+            })
+          }).then(function (dbArticle) {
+            // res.json(dbArticle)
+            console.log(dbArticle)
+          }).catch(function (err) {
+            // If an error occurred, send it to the client
+            console.log(err);
+
+          })
+      })
+
     })
-  });
+    db.Article.find({}).sort({
+      dateWritten: -1
+  }).then(function (dbArticle) {
+    res.json(dbArticle)
+    console.log(dbArticle)
+  }).catch(function (err) {
+    // If an error occurred, send it to the client
+    console.log(err);
+  })
+
+})
+
+
 
 
 app.get("/api/articles", function (req, res) {
@@ -119,9 +132,17 @@ app.get("/api/saved", function (req, res) {
 });
 
 app.post("/api/articles/:id", function (req, res) {
-  db.Article.findOne({ _id: req.body.id })
+  db.Article.findOne({
+      _id: req.params.id
+    })
     .then(function (dbArticle) {
-      return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: true }, {new: true});
+      return db.Article.findOneAndUpdate({
+        _id: dbArticle._id
+      }, {
+        saved: true
+      }, {
+        new: true
+      });
     })
     .catch(function (err) {
       res.json(err);
@@ -130,9 +151,17 @@ app.post("/api/articles/:id", function (req, res) {
 })
 
 app.post("/api/saved/:id", function (req, res) {
-  db.Article.findOne({ _id: req.body.id })
+  db.Article.findOne({
+      _id: req.body.id
+    })
     .then(function (dbArticle) {
-      return db.Article.findOneAndUpdate({ _id: dbArticle._id}, {saved: false }, {new: true});
+      return db.Article.findOneAndUpdate({
+        _id: dbArticle._id
+      }, {
+        saved: false
+      }, {
+        new: true
+      });
     })
     .catch(function (err) {
       res.json(err);
@@ -141,21 +170,19 @@ app.post("/api/saved/:id", function (req, res) {
 })
 
 // Route for grabbing a specific Article by id, populate it with it's note
-app.get("/comment/:id", function(req, res) {
+app.get("/comment/:id", function (req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  db.Article.findOne({ _id: req.params.id })
-    // ..and populate all of the notes associated with it
-    .populate("Comment")
-    .then(function(dbComment) {
-      // If we were able to successfully find an Article with the given id, send it back to the client
-      res.json(dbComment);
+  db.Article.findOne({
+      _id: req.params.id
+    }).populate('Comment')
+    .then(function (dbArticle) {
+      res.json(dbArticle);
     })
-    .catch(function(err) {
+    .catch(function (err) {
       // If an error occurred, send it to the client
       res.json(err);
     });
 });
-
 
 app.post('/comment/:id', function (req, res) {
   // Create a new note and pass the req.body to the entry
@@ -164,9 +191,15 @@ app.post('/comment/:id', function (req, res) {
       // If a Comment was created successfully, find one Article with an `_id` equal to `req.params.id`. Update the Article to be associated with the new comment
       // { new: true } tells the query that we want it to return the updated value -- it returns the original by default
       return db.Article.findOneAndUpdate({
-        _id: req.params.id
+        _id: req.body.id
       }, {
-        comment: dbComment._id
+        $push: {
+          comments: {
+            id: dbComment._id,
+            title: dbComment.title,
+            body: dbComment.body
+          }
+        }
       }, {
         new: true
       });
@@ -182,7 +215,9 @@ app.post('/comment/:id', function (req, res) {
 });
 
 app.post("/api/articles/:id", function (req, res) {
-  db.Comment.findOne({ _id: req.body.id })
+  db.Comment.findOne({
+      _id: req.body.id
+    })
     .then(function (dbComment) {
       return db.Comment.deleteOne(dbComment)
     })
