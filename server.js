@@ -50,7 +50,7 @@ app.get('/scrape', function (req, res) {
       result.title = $(this).find("h1").text();
       result.link = `https://www.smashingmagazine.com${$(this)
                         .find('h1').find('a').attr('href')}`;
-      result.summary = $(this).find('.article--post__teaser').text();
+      result.summary = $(this).find('.article--post__teaser').text().split("\n")[1]
       result.dateWritten = $(this).find('time').attr('datetime');
 
       if (!result.title || !result.link || !result.summary || !result.dateWritten) {
@@ -66,12 +66,8 @@ app.get('/scrape', function (req, res) {
         db.Article.create(result)
 
           .then(function () {
-            db.Article.find({}).sort({
-              dateWritten: -1
-            })
-          }).then(function (dbArticle) {
             // res.json(dbArticle)
-            console.log(dbArticle)
+            console.log(result)
           }).catch(function (err) {
             // If an error occurred, send it to the client
             console.log(err);
@@ -120,7 +116,7 @@ app.get("/api/saved", function (req, res) {
     .sort({
       updatedAt: -1
     })
-    .populate('Comment')
+    .populate('comments')
     .then(function (dbArticle) {
       // If we were able to successfully find Articles, send them back to the client
       res.json(dbArticle);
@@ -174,7 +170,7 @@ app.get("/comment/:id", function (req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
   db.Article.findOne({
       _id: req.params.id
-    }).populate('Comment')
+    }).populate('comments')
     .then(function (dbArticle) {
       res.json(dbArticle);
     })
@@ -194,11 +190,8 @@ app.post('/comment/:id', function (req, res) {
         _id: req.body.id
       }, {
         $push: {
-          comments: {
-            id: dbComment._id,
-            title: dbComment.title,
-            body: dbComment.body
-          }
+          comments:
+            dbComment._id
         }
       }, {
         new: true

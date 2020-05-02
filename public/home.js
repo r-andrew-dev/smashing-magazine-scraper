@@ -34,6 +34,7 @@ $('#saved').on('click', function () {
     $("#article-holder").append('<h1>Saved Articles</h1>')
     // For each one
     for (var i = 0; i < data.length; i++) {
+      console.log(data[i])
       // Display all articles where saved: true;
       $("#article-holder").append(
         `<div class='article card border-success mb-3' id='${data[i]._id}'>
@@ -41,7 +42,7 @@ $('#saved').on('click', function () {
               <p class='card-text text-success ml-3 mt-3' style='font-size:22px;'>${data[i].summary}</p>
               <a href='${data[i].link}' target='_blank' class='ml-3 pb-3'}'>Read More</a><br><br>
               <button class='delete-it btn btn-danger m-3' data-id='${data[i]._id}'>Delete from Saved</button>
-              <button class='comment-it btn btn-danger m-3' data-toggle="modal" data-target="#exampleModalCenter" data-comment='${data[i].comment}' data-id='${data[i]._id}'>Comments</button>
+              <button class='comment-it btn btn-danger m-3' data-toggle="modal" data-target="#exampleModalCenter" data-id='${data[i]._id}'>Comments</button>
               </div>`)
     }
   });
@@ -104,7 +105,7 @@ $('#article-holder').on("click", ".comment-it", function () {
       // The title of the article
       $("#comments").append(`<h2>${data.title}</h2>`);
       // If there's a note in the article
-      if (data.comments.title) {
+      if (data.comments) {
         for (var i = 0; i < data.comments.length; i++) {
           $('#comments').append(`<div id='${data.comments[i]._id}'><h4>${data.comments[i].title}</h4>
         <p>${data.comments[i].body}</p>
@@ -126,7 +127,7 @@ $('.save-comment').on("click", function () {
   let thisId = $(this).attr('data-id')
   let title = $("#titleinput").val()
   let body = $("#bodyinput").val()
-
+  console.log(thisId)
   if (body.length <6 || title.length < 6) {
     $("#ModalTitle").text('Please fill in title and comment of at least five characters!')
   } else {
@@ -142,7 +143,9 @@ $('.save-comment').on("click", function () {
       }
     })
     // With that done
-    .then(function () {
+    .then(function (res) {
+      
+
 
     }).catch(function (err) {
       console.log(err)
