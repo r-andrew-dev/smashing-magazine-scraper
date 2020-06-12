@@ -1,8 +1,9 @@
 # mongo-scrape
 Scraping project for UofW Bootcamp
 
-This project scrapes Smashing Magazine using cheeio. 
+This project scrapes Smashing Magazine using cheeeio. 
 Desgined using Bootstap. https://getbootstrap.com/
+Database mongoDB
 
 Allows users to save and comment on articles. 
 
